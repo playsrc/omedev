@@ -1,77 +1,30 @@
-import { FormEvent, useEffect, useState } from "react";
-import Pusher from "pusher-js";
-
-interface IMessages {
-  id: number;
-  username: string;
-  message: string;
-}
+import { Box, Grid, GridItem, useColorModeValue } from "@chakra-ui/react";
+import Head from "next/head";
+import Header from "../components/Header";
 
 export default function Home() {
-  const [messages, setMessages] = useState<IMessages[]>([]);
-  const [message, setMessage] = useState("");
-  const [username, setUsername] = useState("");
-
-  async function onSubmit(event: FormEvent) {
-    event.preventDefault();
-
-    await fetch(`${process.env.NEXT_PUBLIC_URL}/api/message`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        username,
-        message,
-      }),
-    });
-
-    setMessage("");
-  }
-
-  useEffect(() => {
-    // Enable pusher logging - don't include this in production
-    Pusher.logToConsole = true;
-
-    const pusher = new Pusher(process.env.NEXT_PUBLIC_PUSHER_KEY as string, {
-      cluster: process.env.NEXT_PUBLIC_PUSHER_CLUSTER as string,
-    });
-
-    const channel = pusher.subscribe("chat");
-
-    channel.bind("message", function (data: IMessages) {
-      setMessages((prev) => [...prev, data]);
-    });
-
-    return () => {
-      channel.unbind("message");
-    };
-  }, []);
+  const backgroundColor = useColorModeValue("orange.50", "gray.800");
 
   return (
-    <div>
-      <input
-        type="text"
-        placeholder="Enter your username..."
-        value={username}
-        onChange={(e) => setUsername(e.target.value)}
-      />
-      <div>
-        {messages.map((msg) => (
-          <div key={msg.id}>
-            <p>
-              <strong>{msg.username}</strong>: {msg.message}
-            </p>
-          </div>
-        ))}
-      </div>
-
-      <form onSubmit={onSubmit}>
-        <input
-          type="text"
-          placeholder="Write your message..."
-          value={message}
-          onChange={(e) => setMessage(e.target.value)}
-        />
-      </form>
-    </div>
+    <>
+      <Head>
+        <title>OmeDEV: Talk to developers!</title>
+        <link rel="icon" href="/icon.png" type="image/png" />
+      </Head>
+      <Grid
+        templateRows="max-content 1fr"
+        minHeight="100vh"
+        backgroundColor={backgroundColor}
+      >
+        <GridItem>
+          <Header />
+        </GridItem>
+        <GridItem>
+          <Box border="0px solid red" minHeight="100%">
+            Chat
+          </Box>
+        </GridItem>
+      </Grid>
+    </>
   );
 }
