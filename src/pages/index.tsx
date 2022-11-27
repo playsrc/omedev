@@ -1,5 +1,6 @@
 import { Box, Grid, GridItem, useColorModeValue } from "@chakra-ui/react";
 import Head from "next/head";
+import Chat from "../components/Chat";
 import Header from "../components/Header";
 
 export default function Home() {
@@ -16,14 +17,8 @@ export default function Home() {
         minHeight="100vh"
         backgroundColor={backgroundColor}
       >
-        <GridItem>
-          <Header />
-        </GridItem>
-        <GridItem>
-          <Box border="0px solid red" minHeight="100%">
-            Chat
-          </Box>
-        </GridItem>
+        <Header />
+        <Chat />
       </Grid>
     </>
   );
