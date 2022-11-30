@@ -1,70 +1,51 @@
-/**
- * TODO
- * Rewrite the entire component
- * Fix Pusher using Auth
- */
-
 import {
   Box,
   Button,
-  Flex,
+  Code,
   Grid,
-  GridItem,
-  Kbd,
   Text,
   Textarea,
   useColorModeValue,
 } from "@chakra-ui/react";
-import Pusher from "pusher-js";
-import React, { FormEvent, useEffect, useState } from "react";
-
-// interface IMessages {
-//   id: number;
-//   username: string;
-//   message: string;
-// }
+import { FormEvent, useContext, useEffect, useMemo, useState } from "react";
+import { Payload, PusherContext } from "../context/pusherContext";
 
 function Chat() {
-  // const [messages, setMessages] = useState<IMessages[]>([]);
-  // const [message, setMessage] = useState("");
-  // const [username, setUsername] = useState("");
+  const [newMessage, setNewMessage] = useState("");
+  const [message, setMessage] = useState([{} as Payload]);
 
-  // async function onSubmit(event: FormEvent) {
-  //   event.preventDefault();
+  const { sendMessage, joinChannel, channelId, userId, payload } =
+    useContext(PusherContext);
 
-  //   await fetch(`${process.env.NEXT_PUBLIC_URL}/api/message`, {
-  //     method: "POST",
-  //     headers: { "Content-Type": "application/json" },
-  //     body: JSON.stringify({
-  //       username,
-  //       message,
-  //     }),
-  //   });
-
-  //   setMessage("");
-  // }
-
-  // useEffect(() => {
-  //   // Enable pusher logging - don't include this in production
-  //   Pusher.logToConsole = true;
-
-  //   const pusher = new Pusher(process.env.NEXT_PUBLIC_PUSHER_KEY as string, {
-  //     cluster: process.env.NEXT_PUBLIC_PUSHER_CLUSTER as string,
-  //   });
-
-  //   const channel = pusher.subscribe("chat");
-
-  //   channel.bind("message", function (data: IMessages) {
-  //     setMessages((prev) => [...prev, data]);
-  //   });
-
-  //   return () => {
-  //     channel.unbind("message");
-  //   };
-  // }, []);
+  useMemo(
+    () =>
+      setMessage((prev: any) => [
+        ...prev,
+        { message: payload.message, user: payload.user },
+      ]),
+    [payload.message, payload.user]
+  );
 
   const chatBoxBackground = useColorModeValue("white", "whiteAlpha.200");
   const borderColor = useColorModeValue("gray.400", "gray.900");
+
+  async function onSubmit(event: FormEvent) {
+    event.preventDefault();
+    await sendMessage(newMessage);
+
+    setNewMessage("");
+  }
+
+  useEffect(() => {
+    joinChannel(channelId);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // if (typeof window !== "undefined") {
+  //   window.addEventListener("beforeunload", (e) => {
+  //     e.returnValue = "Are you sure you want to leave? You will lose your chat";
+  //   });
+  // }
 
   return (
     <Grid
@@ -82,17 +63,30 @@ function Chat() {
         borderColor={borderColor}
         p={2}
       >
-        <Text fontSize="sm" fontWeight="bold" opacity={0.8}>
+        {/* <Text fontSize="sm" fontWeight="bold" opacity={0.8}>
           You&apos;re now chatting with a random developer.
+        </Text> */}
+
+        <Text fontSize="sm" fontWeight="bold" opacity={0.8}>
+          Looking for someone you can chat with...
         </Text>
         <Box>
-          <Text as="span" textColor="green" fontWeight="bold">
+          <Text textColor="green" fontWeight="bold">
             ** DEBUG **
           </Text>
-          <Text>My ID: </Text>
-          <Text>Stranger ID: </Text>
-          <Text>Room ID: </Text>
-          <Text>User Pool: </Text>
+          <Text>
+            My ID: <Code as="span">{userId}</Code>{" "}
+          </Text>
+          <Text>
+            Room ID: <Code as="span">{channelId}</Code>
+          </Text>
+
+          {message.map((msg, index) => (
+            <Box key={index}>
+              <Text>{msg?.user}</Text>
+              <Text>{msg?.message}</Text>
+            </Box>
+          ))}
         </Box>
       </Box>
       <Grid
@@ -119,6 +113,8 @@ function Chat() {
           borderRadius="none"
           borderColor={borderColor}
           backgroundColor={chatBoxBackground}
+          onChange={(e) => setNewMessage(e.target.value)}
+          value={newMessage}
         />
         <Button
           borderRadius="none"
@@ -127,6 +123,7 @@ function Chat() {
           backgroundColor={"blue.400"}
           textColor="white"
           _hover={{ backgroundColor: "blue.500" }}
+          onClick={onSubmit}
         >
           <Text>Send</Text>
         </Button>
