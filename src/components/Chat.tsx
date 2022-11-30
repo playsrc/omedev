@@ -80,14 +80,25 @@ function Chat() {
           <Text>
             Room ID: <Code as="span">{channelId}</Code>
           </Text>
-
-          {message.map((msg, index) => (
-            <Box key={index}>
-              <Text>{msg?.user}</Text>
-              <Text>{msg?.message}</Text>
-            </Box>
-          ))}
         </Box>
+        {message.map((msg: any, index) => (
+          <Box key={index}>
+            {msg?.user !== userId && msg?.user?.length > 0 ? (
+              <Text as="strong" color="red">
+                Developer:{" "}
+              </Text>
+            ) : (
+              msg?.user?.length > 0 && (
+                <Text as="strong" color="blue">
+                  You:{" "}
+                </Text>
+              )
+            )}
+            {msg?.message?.length > 0 && (
+              <Text display="inline-block">{msg?.message}</Text>
+            )}
+          </Box>
+        ))}
       </Box>
       <Grid
         overflow="hidden"

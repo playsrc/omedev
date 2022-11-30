@@ -5,12 +5,13 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
-  const { message, channelId } = req.body;
+  const { message, channelId, userId } = req.body;
 
   console.log("Data from the backend", req.body);
 
   await pusher.trigger(`presence-${channelId}`, "message", {
     message,
+    userId,
   });
 
   res.json({ status: 200 });

@@ -48,7 +48,7 @@ export const PusherProvider = ({ children }: Props) => {
 
     channel.bind("message", (data: any) => {
       console.log("DATA FROM JOIN CHANNEL", data.message);
-      setPayload({ message: data.message, user: userId });
+      setPayload({ message: data.message, user: data.userId });
       // setMessages((prev) => [...prev, data.message]);
     });
   }
@@ -57,6 +57,7 @@ export const PusherProvider = ({ children }: Props) => {
     await axios.post("/api/pusher", {
       channelId: channelId,
       message: text,
+      userId: userId,
     });
   }
 
