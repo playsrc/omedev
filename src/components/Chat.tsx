@@ -2,6 +2,7 @@ import {
   Box,
   Button,
   Code,
+  Flex,
   Grid,
   Text,
   Textarea,
@@ -49,7 +50,7 @@ function Chat() {
 
   return (
     <Grid
-      templateRows="1fr 80px"
+      templateRows="1fr 90px"
       borderRadius={10}
       minHeight="100%"
       gap={"2"}
@@ -70,6 +71,7 @@ function Chat() {
         <Text fontSize="sm" fontWeight="bold" opacity={0.8}>
           Looking for someone you can chat with...
         </Text>
+
         <Box>
           <Text textColor="green" fontWeight="bold">
             ** DEBUG **
@@ -84,12 +86,12 @@ function Chat() {
         {message.map((msg: any, index) => (
           <Box key={index}>
             {msg?.user !== userId && msg?.user?.length > 0 ? (
-              <Text as="strong" color="red">
+              <Text as="strong" color="red.400">
                 Developer:{" "}
               </Text>
             ) : (
               msg?.user?.length > 0 && (
-                <Text as="strong" color="blue">
+                <Text as="strong" color="blue.400">
                   You:{" "}
                 </Text>
               )
@@ -100,24 +102,22 @@ function Chat() {
           </Box>
         ))}
       </Box>
-      <Grid
-        overflow="hidden"
-        templateColumns="100px 1fr 100px"
-        gap={2}
-        borderBottomRadius={10}
-      >
+      <Flex gap={2}>
         <Button
+          width={"150px"}
           borderRadius="none"
+          borderBottomLeftRadius={10}
           flexDir="column"
           blockSize="100%"
-          backgroundColor={"blue.400"}
-          textColor="white"
-          _hover={{ backgroundColor: "blue.500" }}
+          border={"1px solid"}
+          borderColor={borderColor}
+          backgroundColor={chatBoxBackground}
         >
           <Text>New</Text>
         </Button>
         <Textarea
           variant="unstyled"
+          height={"full"}
           p={2}
           resize="none"
           border={"1px solid"}
@@ -128,17 +128,19 @@ function Chat() {
           value={newMessage}
         />
         <Button
+          width={"150px"}
           borderRadius="none"
+          borderBottomRightRadius={10}
           flexDir="column"
           blockSize="100%"
-          backgroundColor={"blue.400"}
-          textColor="white"
-          _hover={{ backgroundColor: "blue.500" }}
+          border={"1px solid"}
+          borderColor={borderColor}
+          backgroundColor={chatBoxBackground}
           onClick={onSubmit}
         >
           <Text>Send</Text>
         </Button>
-      </Grid>
+      </Flex>
     </Grid>
   );
 }
