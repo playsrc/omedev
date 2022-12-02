@@ -7,12 +7,14 @@ export default async function handler(
 ) {
   const { message, channelId, userId } = req.body;
 
-  console.log("Data from the backend", req.body);
-
-  await pusher.trigger(channelId, "message", {
-    message,
-    userId,
-  });
+  try {
+    await pusher.trigger(channelId, "message", {
+      message,
+      userId,
+    });
+  } catch (error) {
+    console.error("/api/pusher error", error);
+  }
 
   res.json({ status: 200 });
 }
