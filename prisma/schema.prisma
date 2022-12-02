@@ -11,8 +11,7 @@ datasource db {
 }
 
 model Rooms {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId
-  pusherId  String   @unique
-  userCount Int      @default(0)
-  isFull    Boolean?
+  id       String   @id @default(auto()) @map("_id") @db.ObjectId
+  pusherId String   @unique
+  isFull   Boolean? @default(false)
 }

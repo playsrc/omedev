@@ -10,7 +10,7 @@ export default async function searchUser(
   const randomString = Math.random().toString(36).slice(2);
 
   availableRoom = await db.rooms.findFirst({
-    where: { userCount: { lt: 2 } },
+    where: { isFull: { equals: false } },
   });
 
   if (!availableRoom) {

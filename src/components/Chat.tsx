@@ -4,6 +4,7 @@ import {
   Code,
   Flex,
   Grid,
+  Spinner,
   Text,
   Textarea,
   useColorModeValue,
@@ -15,7 +16,7 @@ function Chat() {
   const [newMessage, setNewMessage] = useState("");
   const [message, setMessage] = useState([{} as Payload]);
 
-  const { sendMessage, joinChannel, channelId, userId, payload } =
+  const { sendMessage, joinChannel, channelId, userId, payload, foundUser } =
     useContext(PusherContext);
 
   useMemo(
@@ -38,7 +39,7 @@ function Chat() {
   }
 
   useEffect(() => {
-    joinChannel(channelId);
+    joinChannel();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -62,45 +63,53 @@ function Chat() {
         backgroundColor={chatBoxBackground}
         border="1px solid"
         borderColor={borderColor}
-        p={2}
+        height="100%"
+        position={"relative"}
+        overflow="hidden"
       >
-        {/* <Text fontSize="sm" fontWeight="bold" opacity={0.8}>
-          You&apos;re now chatting with a random developer.
-        </Text> */}
-
-        <Text fontSize="sm" fontWeight="bold" opacity={0.8}>
-          Looking for someone you can chat with...
-        </Text>
-
-        <Box>
-          <Text textColor="green" fontWeight="bold">
-            ** DEBUG **
-          </Text>
-          <Text>
-            My ID: <Code as="span">{userId}</Code>{" "}
-          </Text>
-          <Text>
-            Room ID: <Code as="span">{channelId}</Code>
-          </Text>
-        </Box>
-        {message.map((msg: any, index) => (
-          <Box key={index}>
-            {msg?.user !== userId && msg?.user?.length > 0 ? (
-              <Text as="strong" color="red.400">
-                Developer:{" "}
-              </Text>
-            ) : (
-              msg?.user?.length > 0 && (
-                <Text as="strong" color="blue.400">
-                  You:{" "}
-                </Text>
-              )
-            )}
-            {msg?.message?.length > 0 && (
-              <Text display="inline-block">{msg?.message}</Text>
-            )}
+        <Box overflowY="auto" position="absolute" inset={0} px={3} py={2}>
+          <Box mb={4}>
+            <Text fontWeight="bold">** DEBUG **</Text>
+            <Text>
+              My ID: <Code as="span">{userId}</Code>{" "}
+            </Text>
+            <Text>
+              Room ID: <Code as="span">{channelId}</Code>
+            </Text>
           </Box>
-        ))}
+
+          {foundUser ? (
+            <Text fontSize="sm" fontWeight="bold">
+              You&apos;re now chatting with a random developer.
+            </Text>
+          ) : (
+            <Flex>
+              <Spinner mr={2} />
+              <Text fontSize="sm" fontWeight="bold">
+                Looking for someone you can chat with...
+              </Text>
+            </Flex>
+          )}
+
+          {message.map((msg: any, index) => (
+            <Box key={index}>
+              {msg?.user !== userId && msg?.user?.length > 0 ? (
+                <Text as="strong" color="red.400">
+                  Developer:{" "}
+                </Text>
+              ) : (
+                msg?.user?.length > 0 && (
+                  <Text as="strong" color="blue.400">
+                    You:{" "}
+                  </Text>
+                )
+              )}
+              {msg?.message?.length > 0 && (
+                <Text display="inline-block">{msg?.message}</Text>
+              )}
+            </Box>
+          ))}
+        </Box>
       </Box>
       <Flex gap={2}>
         <Button
@@ -112,8 +121,12 @@ function Chat() {
           border={"1px solid"}
           borderColor={borderColor}
           backgroundColor={chatBoxBackground}
+          gap={1}
         >
-          <Text>New</Text>
+          <Text>Stop</Text>
+          <Text fontFamily="monospace" fontSize="sm" color="blue.300">
+            Esc
+          </Text>
         </Button>
         <Textarea
           variant="unstyled"
@@ -126,6 +139,7 @@ function Chat() {
           backgroundColor={chatBoxBackground}
           onChange={(e) => setNewMessage(e.target.value)}
           value={newMessage}
+          disabled={!foundUser}
         />
         <Button
           width={"150px"}
@@ -137,8 +151,13 @@ function Chat() {
           borderColor={borderColor}
           backgroundColor={chatBoxBackground}
           onClick={onSubmit}
+          disabled={!foundUser}
+          gap={1}
         >
           <Text>Send</Text>
+          <Text fontFamily="monospace" fontSize="sm" color="blue.300">
+            Enter
+          </Text>
         </Button>
       </Flex>
     </Grid>

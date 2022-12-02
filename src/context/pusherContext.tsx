@@ -7,13 +7,14 @@ type Props = {
 };
 
 type Context = {
-  joinChannel: (name: string) => Promise<void>;
+  joinChannel: () => Promise<void>;
   sendMessage: (text: string) => Promise<void>;
   setChannelId: React.Dispatch<React.SetStateAction<string>>;
   channelId: string;
   userId: string;
   payload: Payload;
   setStartPusher: React.Dispatch<React.SetStateAction<boolean>>;
+  foundUser: boolean;
 };
 
 type PresenceChannel = {
@@ -40,20 +41,38 @@ export const PusherProvider = ({ children }: Props) => {
   const [userId, setUserId] = useState("");
   const [payload, setPayload] = useState<Payload>({} as Payload);
   const [startPusher, setStartPusher] = useState(false);
+  const [foundUser, setFoundUser] = useState(false);
 
-  async function joinChannel(name: string) {
-    // const channel = pusher.subscribe(`presence-${name}`);
-    const channel = pusher?.subscribe(name);
+  async function joinChannel() {
+    const availableRoom = await axios.get("/api/searchUser");
+    const { data } = availableRoom;
 
+    setChannelId(data.pusherId);
+    const pusherId = data.pusherId;
+
+    const channel = pusher?.subscribe(pusherId);
+
+    /**
+     * Known bug: if multiple users login
+     * before pusher registers this event it will
+     * create a room of more than just 2 people
+     */
+
+    // TODO: Fix that bug by delaying room attribution/creation before this event
     channel.bind(
       "pusher:subscription_succeeded",
       async (data: PresenceChannel) => {
         setUserId(data.myID);
-        // Update DB userCount
+        // Update userCount in the database
         await axios.post("/api/room", {
-          channelId: channelId,
-          userCount: 1,
+          channelId: pusherId,
+          userCount: data.count,
         });
+
+        if (data.count === 2) {
+          // Unlock and start chat
+          setFoundUser(true);
+        }
       }
     );
 
@@ -64,18 +83,17 @@ export const PusherProvider = ({ children }: Props) => {
 
     channel.bind("pusher:member_added", async (data: any) => {
       console.log("Hello from member_added event", data);
-      // Close the room as soon as someone joins it
-      await axios.post("/api/room", {
-        channelId: channelId,
-        isFull: true,
-      });
+      setFoundUser(true);
     });
 
     channel.bind("pusher:member_removed", async () => {
       console.log("Goodbye from member_removed event");
-      // Kill session if someone leaves
+      // TODO split this for when it finds a user and when a user disconnects
+      setFoundUser(false);
+
+      // Send isClose to terminate the room
       await axios.post("/api/room", {
-        channelId: channelId,
+        channelId: pusherId,
         isClosed: true,
       });
     });
@@ -97,9 +115,12 @@ export const PusherProvider = ({ children }: Props) => {
     userId,
     payload,
     setStartPusher,
+    foundUser,
   };
 
   useEffect(() => {
+    // Only start pusher at specific moments
+    // TODO: Maybe implement a way to kill/restart it?
     if (startPusher) {
       if (process.env.NODE_ENV !== "production") {
         // Enable pusher logging - isn't included in production
@@ -112,26 +133,6 @@ export const PusherProvider = ({ children }: Props) => {
         authEndpoint: "api/pusher/auth",
       });
     }
-    // channel.bind("pusher:subscription_succeeded", (data: any) => {
-    //   setData(data);
-    //   console.log("Subscription succeeded!", data);
-    // });
-
-    // channel.bind("pusher:member_added", (data: any) => {
-    //   console.log("Hello from member_added event", data);
-    // });
-
-    // channel.bind("pusher:member_removed", () => {
-    //   console.log("Goodbye from member_removed event");
-    // });
-
-    // channel.bind("chat-update", (data: any) => {
-    //   console.log("Data from chat-update", data);
-    // });
-
-    // return () => {
-    //   // pusher.unsubscribe("presence-channel");
-    // };
   }, [startPusher]);
 
   return (

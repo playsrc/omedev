@@ -3,26 +3,28 @@ import { db } from "../../utils/prismadb";
 
 export default async function room(req: NextApiRequest, res: NextApiResponse) {
   try {
-    const { channelId, userCount, isClosed, isFull } = req.body;
+    const { channelId, userCount, isClosed } = req.body;
 
-    const currentUserCount = (await db.rooms.findFirst({
-      where: { pusherId: channelId },
-      select: { userCount: true },
-    })) || { userCount: 0 };
+    // Update isFull to close the room
+    if (userCount === 2) {
+      await db.rooms.update({
+        data: {
+          isFull: true,
+        },
+        where: {
+          pusherId: channelId,
+        },
+      });
+    }
 
-    // Populate the room at first subscription
-
-    // if (currentUserCount.userCount === 0) {
-    //   console.log("HEEEEEY");
-    //   await db.rooms.update({
-    //     where: {
-    //       pusherId: channelId,
-    //     },
-    //     data: {
-    //       userCount: { increment: 1 },
-    //     },
-    //   });
-    // }
+    // Delete the room when someone disconnects
+    if (isClosed) {
+      await db.rooms.delete({
+        where: {
+          pusherId: channelId,
+        },
+      });
+    }
 
     res.json({ everything: "OK" });
   } catch (error) {
