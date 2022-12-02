@@ -9,7 +9,7 @@ export default async function handler(
 
   console.log("Data from the backend", req.body);
 
-  await pusher.trigger(`presence-${channelId}`, "message", {
+  await pusher.trigger(channelId, "message", {
     message,
     userId,
   });

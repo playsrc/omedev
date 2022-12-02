@@ -6,6 +6,7 @@ import {
   Text,
   useColorModeValue,
 } from "@chakra-ui/react";
+import axios from "axios";
 import Head from "next/head";
 import { FormEvent, useContext, useState } from "react";
 import Chat from "../components/Chat";
@@ -16,14 +17,24 @@ export default function Home() {
   const backgroundColor = useColorModeValue("orange.50", "gray.800");
   const [isSearchingUsers, setIsSearchingUsers] = useState(false);
 
-  const { setChannelId } = useContext(PusherContext);
+  const { setChannelId, setStartPusher } = useContext(PusherContext);
   const [id, setId] = useState("");
 
-  function onSubmit(event: FormEvent) {
+  async function onSubmit(event: FormEvent) {
     event.preventDefault();
-    setIsSearchingUsers(true);
+    setStartPusher(true);
 
-    setChannelId(id);
+    try {
+      const availableRoom = await axios.get("/api/searchUser");
+      const { data } = availableRoom;
+      console.log(`Channel: ${data.pusherId}\nuserCount: ${data.userCount}`);
+
+      setChannelId(data.pusherId);
+    } catch (error) {
+      console.error(error);
+    }
+
+    setIsSearchingUsers(true);
   }
 
   return (
@@ -45,13 +56,7 @@ export default function Home() {
           // FOR DEBUG PURPOSES AND TESTING
           <Box>
             <Text>Start the chat?</Text>
-            <form onSubmit={onSubmit}>
-              <Input
-                placeholder="Enter chat ID"
-                onChange={(e) => setId(e.target.value)}
-              />
-              <Button type="submit">Go!</Button>
-            </form>
+            <Button onClick={onSubmit}>Go!</Button>
           </Box>
         )}
       </Grid>
