@@ -3,7 +3,12 @@ import { db } from "../../utils/prismadb";
 
 export default async function room(req: NextApiRequest, res: NextApiResponse) {
   try {
-    const { channelId, userCount, isClosed } = req.body;
+    const { channelId, userCount, isClosed, members } = req.body;
+
+    if (members) {
+      const arr = Object.keys(members);
+      console.log("Members: ", arr);
+    }
 
     // Update isFull to close the room
     if (userCount === 2) {
