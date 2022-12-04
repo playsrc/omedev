@@ -15,6 +15,8 @@ type Context = {
   payload: Payload;
   setStartPusher: React.Dispatch<React.SetStateAction<boolean>>;
   foundUser: boolean;
+  setUserQuit: React.Dispatch<React.SetStateAction<boolean>>;
+  userCount: number;
 };
 
 type PresenceChannel = {
@@ -42,6 +44,9 @@ export const PusherProvider = ({ children }: Props) => {
   const [payload, setPayload] = useState<Payload>({} as Payload);
   const [startPusher, setStartPusher] = useState(false);
   const [foundUser, setFoundUser] = useState(false);
+  // TODO: use this on the chat component
+  const [userCount, setUserCount] = useState(0);
+  const [userQuit, setUserQuit] = useState(false);
 
   async function joinChannel() {
     const availableRoom = await axios.get("/api/searchUser");
@@ -52,13 +57,6 @@ export const PusherProvider = ({ children }: Props) => {
 
     const channel = pusher?.subscribe(pusherId);
 
-    /**
-     * Known bug: if multiple users login
-     * before pusher registers this event it will
-     * create a room of more than just 2 people
-     */
-
-    // TODO: Fix that bug by delaying room attribution/creation before this event
     channel.bind(
       "pusher:subscription_succeeded",
       async (data: PresenceChannel) => {
@@ -67,12 +65,21 @@ export const PusherProvider = ({ children }: Props) => {
         await axios.post("/api/room", {
           channelId: pusherId,
           userCount: data.count,
+          members: data.members,
         });
 
         if (data.count === 2) {
           // Unlock and start chat
           setFoundUser(true);
         }
+
+        if (data.count > 2) {
+          // TODO: Handle this situation better
+          alert("This room is full!");
+        }
+
+        setUserCount(data.count);
+        console.log("DEBUG (userCount): ", userCount);
       }
     );
 
@@ -81,21 +88,21 @@ export const PusherProvider = ({ children }: Props) => {
       setPayload({ message: data.message, user: data.userId });
     });
 
-    channel.bind("pusher:member_added", async (data: any) => {
-      console.log("Hello from member_added event", data);
+    channel.bind("pusher:member_added", (member: any) => {
+      console.log("Hello from member_added event", member.id);
       setFoundUser(true);
     });
 
-    channel.bind("pusher:member_removed", async () => {
-      console.log("Goodbye from member_removed event");
-      // TODO split this for when it finds a user and when a user disconnects
-      setFoundUser(false);
+    channel.bind("pusher:member_removed", async (member: any) => {
+      console.log("Goodbye from member_removed event", member.id);
 
-      // Send isClose to terminate the room
       await axios.post("/api/room", {
         channelId: pusherId,
         isClosed: true,
       });
+
+      alert("Developer has disconnected!");
+      window.location.reload();
     });
   }
 
@@ -116,6 +123,8 @@ export const PusherProvider = ({ children }: Props) => {
     payload,
     setStartPusher,
     foundUser,
+    setUserQuit,
+    userCount,
   };
 
   useEffect(() => {
