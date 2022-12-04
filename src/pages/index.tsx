@@ -3,6 +3,7 @@ import Head from "next/head";
 import { FormEvent, useContext, useState } from "react";
 import Chat from "../components/Chat";
 import Header from "../components/Header";
+import Intro from "../components/Intro";
 import { PusherContext } from "../context/pusherContext";
 
 export default function Home() {
@@ -34,16 +35,7 @@ export default function Home() {
         backgroundColor={backgroundColor}
       >
         <Header />
-
-        {redirectToChat ? (
-          <Chat />
-        ) : (
-          // FOR DEBUG PURPOSES AND TESTING
-          <Box>
-            <Text>Start the chat?</Text>
-            <Button onClick={onSubmit}>Go!</Button>
-          </Box>
-        )}
+        {redirectToChat ? <Chat /> : <Intro onSubmit={onSubmit} />}
       </Grid>
     </>
   );
