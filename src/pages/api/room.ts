@@ -24,11 +24,15 @@ export default async function room(req: NextApiRequest, res: NextApiResponse) {
 
     // Delete the room when someone disconnects
     if (isClosed) {
-      await db.rooms.delete({
-        where: {
-          pusherId: channelId,
-        },
-      });
+      try {
+        await db.rooms.delete({
+          where: {
+            pusherId: channelId,
+          },
+        });
+      } catch (error) {
+        console.error("Delete room error", error);
+      }
     }
 
     res.json({ everything: "OK" });
