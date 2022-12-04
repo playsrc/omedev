@@ -17,6 +17,10 @@ type Context = {
   foundUser: boolean;
   setUserQuit: React.Dispatch<React.SetStateAction<boolean>>;
   userCount: number;
+  userQuit: boolean;
+  setFoundUser: React.Dispatch<React.SetStateAction<boolean>>;
+  setStop: React.Dispatch<React.SetStateAction<boolean>>;
+  stop: boolean;
 };
 
 type PresenceChannel = {
@@ -44,9 +48,13 @@ export const PusherProvider = ({ children }: Props) => {
   const [payload, setPayload] = useState<Payload>({} as Payload);
   const [startPusher, setStartPusher] = useState(false);
   const [foundUser, setFoundUser] = useState(false);
-  // TODO: use this on the chat component
   const [userCount, setUserCount] = useState(0);
   const [userQuit, setUserQuit] = useState(false);
+  const [stop, setStop] = useState(false);
+
+  if (stop) {
+    pusher.disconnect();
+  }
 
   async function joinChannel() {
     const availableRoom = await axios.get("/api/searchUser");
@@ -62,24 +70,24 @@ export const PusherProvider = ({ children }: Props) => {
       async (data: PresenceChannel) => {
         setUserId(data.myID);
         // Update userCount in the database
-        await axios.post("/api/room", {
-          channelId: pusherId,
-          userCount: data.count,
-          members: data.members,
-        });
+        if (data.count <= 2) {
+          await axios.post("/api/room", {
+            channelId: pusherId,
+            userCount: data.count,
+            members: data.members,
+          });
 
-        if (data.count === 2) {
-          // Unlock and start chat
-          setFoundUser(true);
+          if (data.count === 2) {
+            // Unlock and start chat
+            setFoundUser(true);
+          }
+
+          setUserCount(data.count);
+        } else {
+          alert("This room is full, Please try again...");
+          pusher.disconnect();
+          window.location.reload();
         }
-
-        if (data.count > 2) {
-          // TODO: Handle this situation better
-          alert("This room is full!");
-        }
-
-        setUserCount(data.count);
-        console.log("DEBUG (userCount): ", userCount);
       }
     );
 
@@ -101,8 +109,9 @@ export const PusherProvider = ({ children }: Props) => {
         isClosed: true,
       });
 
-      alert("Developer has disconnected!");
-      window.location.reload();
+      setUserQuit(true);
+      setFoundUser(false);
+      // alert("Developer has disconnected!");
     });
   }
 
@@ -125,6 +134,10 @@ export const PusherProvider = ({ children }: Props) => {
     foundUser,
     setUserQuit,
     userCount,
+    userQuit,
+    setStop,
+    stop,
+    setFoundUser,
   };
 
   useEffect(() => {

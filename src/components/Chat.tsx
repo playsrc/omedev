@@ -15,12 +15,24 @@ import { Payload, PusherContext } from "../context/pusherContext";
 function Chat() {
   const [newMessage, setNewMessage] = useState("");
   const [message, setMessage] = useState([{} as Payload]);
+  const [stopCount, setStopCount] = useState(1);
 
-  // A random delay to prevent multiple connections beyond room the limits
+  // A random delay to *ATTEMPT* to prevent multiple connections beyond room the limits
   const delay = Math.floor(Math.random() * 10000 + 1);
 
-  const { sendMessage, joinChannel, channelId, userId, payload, foundUser } =
-    useContext(PusherContext);
+  const {
+    sendMessage,
+    joinChannel,
+    channelId,
+    userId,
+    payload,
+    foundUser,
+    userQuit,
+    setUserQuit,
+    setStop,
+    stop,
+    setFoundUser,
+  } = useContext(PusherContext);
 
   useMemo(
     () =>
@@ -34,6 +46,18 @@ function Chat() {
   const chatBoxBackground = useColorModeValue("white", "whiteAlpha.200");
   const borderColor = useColorModeValue("gray.400", "gray.900");
 
+  function handleStopButton() {
+    setStopCount((prev) => prev + 1);
+    setStop(true);
+    setFoundUser(false);
+
+    if (stopCount > 1) {
+      window.location.reload();
+    } else if (userQuit) {
+      window.location.reload();
+    }
+  }
+
   async function onSubmit(event: FormEvent) {
     event.preventDefault();
     await sendMessage(newMessage);
@@ -42,7 +66,6 @@ function Chat() {
   }
 
   useEffect(() => {
-    console.log(delay);
     setTimeout(() => joinChannel(), delay);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -87,12 +110,15 @@ function Chat() {
               You&apos;re now chatting with a random developer.
             </Text>
           ) : (
-            <Flex>
-              <Spinner mr={2} />
-              <Text fontSize="sm" fontWeight="bold">
-                Looking for someone you can chat with...
-              </Text>
-            </Flex>
+            !userQuit &&
+            !stop && (
+              <Flex>
+                <Spinner mr={2} />
+                <Text fontSize="sm" fontWeight="bold">
+                  Looking for someone you can chat with...
+                </Text>
+              </Flex>
+            )
           )}
 
           {message.map((msg: any, index) => (
@@ -113,6 +139,12 @@ function Chat() {
               )}
             </Box>
           ))}
+
+          {userQuit ? (
+            <Text>Developer has disconnected!</Text>
+          ) : (
+            stop && <Text>You have disconnected!</Text>
+          )}
         </Box>
       </Box>
       <Flex gap={2}>
@@ -126,8 +158,9 @@ function Chat() {
           borderColor={borderColor}
           backgroundColor={chatBoxBackground}
           gap={1}
+          onClick={handleStopButton}
         >
-          <Text>Stop</Text>
+          {stop || userQuit ? <Text>New</Text> : <Text>Stop</Text>}
           <Text fontFamily="monospace" fontSize="sm" color="blue.300">
             Esc
           </Text>
