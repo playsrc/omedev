@@ -16,6 +16,9 @@ function Chat() {
   const [newMessage, setNewMessage] = useState("");
   const [message, setMessage] = useState([{} as Payload]);
 
+  // A random delay to prevent multiple connections beyond room the limits
+  const delay = Math.floor(Math.random() * 10000 + 1);
+
   const { sendMessage, joinChannel, channelId, userId, payload, foundUser } =
     useContext(PusherContext);
 
@@ -39,7 +42,8 @@ function Chat() {
   }
 
   useEffect(() => {
-    joinChannel();
+    console.log(delay);
+    setTimeout(() => joinChannel(), delay);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
