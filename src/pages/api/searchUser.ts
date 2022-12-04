@@ -8,6 +8,8 @@ export default async function searchUser(
   let availableRoom = undefined;
 
   const randomString = Math.random().toString(36).slice(2);
+  const expireDate = new Date();
+  expireDate.setDate(expireDate.getDate() + 1); // Tomorrow
 
   availableRoom = await db.rooms.findFirst({
     where: { isFull: { equals: false } },
@@ -17,6 +19,7 @@ export default async function searchUser(
     availableRoom = await db.rooms.create({
       data: {
         pusherId: `presence-${randomString}`,
+        expireAt: expireDate,
       },
     });
   }
