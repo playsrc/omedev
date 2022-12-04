@@ -9,13 +9,22 @@ import {
   Textarea,
   useColorModeValue,
 } from "@chakra-ui/react";
-import { FormEvent, useContext, useEffect, useMemo, useState } from "react";
+import {
+  FormEvent,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { Payload, PusherContext } from "../context/pusherContext";
 
 function Chat() {
   const [newMessage, setNewMessage] = useState("");
   const [message, setMessage] = useState([{} as Payload]);
   const [stopCount, setStopCount] = useState(1);
+
+  const btnRef = useRef(null);
 
   // A random delay to *ATTEMPT* to prevent multiple connections beyond room the limits
   const delay = Math.floor(Math.random() * 10000 + 1);
@@ -78,15 +87,16 @@ function Chat() {
 
   return (
     <Grid
+      width="100%"
       templateRows="1fr 90px"
-      borderRadius={10}
       minHeight="100%"
+      maxWidth="1440px"
+      margin="0 auto"
       gap={"2"}
-      px={3}
-      py={4}
+      p={{ md: "4", base: "0" }}
     >
       <Box
-        borderTopRadius={10}
+        borderTopRadius={{ md: 10, base: "unset" }}
         backgroundColor={chatBoxBackground}
         border="1px solid"
         borderColor={borderColor}
@@ -94,7 +104,14 @@ function Chat() {
         position={"relative"}
         overflow="hidden"
       >
-        <Box overflowY="auto" position="absolute" inset={0} px={3} py={2}>
+        <Box
+          overflowY="auto"
+          position="absolute"
+          inset={0}
+          px={3}
+          py={2}
+          lineHeight={1.5}
+        >
           <Box mb={4}>
             <Text fontWeight="bold">** DEBUG **</Text>
             <Text>
@@ -151,19 +168,17 @@ function Chat() {
         <Button
           width={"150px"}
           borderRadius="none"
-          borderBottomLeftRadius={10}
+          borderBottomLeftRadius={{ md: 10, base: "unset" }}
           flexDir="column"
           blockSize="100%"
           border={"1px solid"}
           borderColor={borderColor}
-          backgroundColor={chatBoxBackground}
+          color={stop || userQuit ? "white" : "unset"}
+          backgroundColor={stop || userQuit ? "blue.500" : chatBoxBackground}
           gap={1}
           onClick={handleStopButton}
         >
           {stop || userQuit ? <Text>New</Text> : <Text>Stop</Text>}
-          <Text fontFamily="monospace" fontSize="sm" color="blue.300">
-            Esc
-          </Text>
         </Button>
         <Textarea
           variant="unstyled"
@@ -192,9 +207,6 @@ function Chat() {
           gap={1}
         >
           <Text>Send</Text>
-          <Text fontFamily="monospace" fontSize="sm" color="blue.300">
-            Enter
-          </Text>
         </Button>
       </Flex>
     </Grid>
