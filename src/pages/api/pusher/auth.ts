@@ -1,5 +1,5 @@
 import { NextApiRequest, NextApiResponse } from "next";
-import { pusher } from "../../../lib/pusher";
+import { pusher } from "../../../utils/server.pusher";
 
 export default async function handler(
   req: NextApiRequest,

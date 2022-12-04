@@ -1,5 +1,5 @@
 import { NextApiRequest, NextApiResponse } from "next";
-import { db } from "../../utils/prismadb";
+import { db } from "../../utils/server.prismadb";
 
 export default async function searchUser(
   req: NextApiRequest,
