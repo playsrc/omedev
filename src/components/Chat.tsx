@@ -70,6 +70,9 @@ function Chat() {
 
   async function onSubmit(event: FormEvent) {
     event.preventDefault();
+    if (!newMessage.trim()) {
+      return;
+    }
     await sendMessage(newMessage);
 
     setNewMessage("");
