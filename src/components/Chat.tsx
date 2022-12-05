@@ -4,6 +4,7 @@ import {
   Code,
   Flex,
   Grid,
+  Input,
   Spinner,
   Text,
   Textarea,
@@ -188,7 +189,8 @@ function Chat() {
           )}
         </Box>
       </Box>
-      <Flex gap={2}>
+
+      <Flex gap={2} as="form" onSubmit={onSubmit}>
         <Button
           ref={buttonRef}
           width={"150px"}
@@ -202,13 +204,15 @@ function Chat() {
           backgroundColor={stop || userQuit ? "blue.500" : chatBoxBackground}
           gap={1}
           onClick={handleStopButton}
+          type="button"
         >
           {stop || userQuit ? <Text>New</Text> : <Text>Stop</Text>}
         </Button>
-        <Textarea
+        <Input
           variant="unstyled"
-          height={"full"}
-          p={2}
+          px={2}
+          pb={10}
+          height="100%"
           resize="none"
           border={"1px solid"}
           borderRadius="none"
@@ -228,7 +232,7 @@ function Chat() {
           border={"1px solid"}
           borderColor={borderColor}
           backgroundColor={chatBoxBackground}
-          onClick={onSubmit}
+          type="submit"
           disabled={!foundUser}
           gap={1}
         >
