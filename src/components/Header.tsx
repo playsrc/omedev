@@ -9,13 +9,8 @@ import {
 } from "@chakra-ui/react";
 
 function Header() {
-  /**
-   * TODO: Add a small button to toggle between dark/light mode
-   * const { toggleColorMode } = useColorMode();
-   */
   const headerBackgroundColor = useColorModeValue("white", "gray.700");
   const { toggleColorMode, colorMode } = useColorMode();
-  console.log(colorMode);
 
   return (
     <Flex
@@ -23,6 +18,7 @@ function Header() {
       boxShadow="lg"
       backgroundColor={headerBackgroundColor}
       as="header"
+      zIndex={1}
     >
       <Flex
         width="100%"
@@ -34,18 +30,20 @@ function Header() {
         direction={{ base: "column", md: "row" }}
       >
         <Flex gap={2} alignItems="center">
-          <Image src="/icon.png" alt="" blockSize={"14"} />
-          <Image src="/logo.png" alt="" blockSize={"14"} />
+          <Image src="/icon.png" alt="" blockSize={{ md: "14", base: "12" }} />
+          <Image src="/logo.png" alt="" blockSize={{ md: "14", base: "12" }} />
 
-          <Button
-            onClick={toggleColorMode}
-            display={{ md: "unset", base: "none" }}
-          >
+          <Button onClick={toggleColorMode}>
             {colorMode === "dark" ? "Light" : "Dark"}
           </Button>
         </Flex>
 
-        <Flex ml={{ base: "unset", md: "16" }} my="1" alignItems="center">
+        <Flex
+          ml="16"
+          my="1"
+          alignItems="center"
+          display={{ md: "unset", base: "none" }}
+        >
           <Text
             fontWeight={"bold"}
             fontSize="2xl"
