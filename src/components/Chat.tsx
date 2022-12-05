@@ -133,9 +133,9 @@ function Chat() {
           inset={0}
           px={3}
           py={2}
-          lineHeight={1.5}
+          lineHeight={1.6}
         >
-          <Box mb={4}>
+          {/* <Box mb={4}>
             <Text fontWeight="bold">** DEBUG **</Text>
             <Text>
               My ID: <Code as="span">{userId}</Code>{" "}
@@ -143,22 +143,23 @@ function Chat() {
             <Text>
               Room ID: <Code as="span">{channelId}</Code>
             </Text>
-          </Box>
+          </Box> */}
 
           {foundUser ? (
             <Text fontSize="sm" fontWeight="bold">
               You&apos;re now chatting with a random developer.
             </Text>
+          ) : !userQuit && !stop ? (
+            <Flex>
+              <Spinner mr={2} />
+              <Text fontSize="sm" fontWeight="bold">
+                Looking for someone you can chat with...
+              </Text>
+            </Flex>
           ) : (
-            !userQuit &&
-            !stop && (
-              <Flex>
-                <Spinner mr={2} />
-                <Text fontSize="sm" fontWeight="bold">
-                  Looking for someone you can chat with...
-                </Text>
-              </Flex>
-            )
+            <Text fontSize="sm" fontWeight="bold">
+              You&apos;re now chatting with a random developer.
+            </Text>
           )}
 
           {message.map((msg: any, index) => (
@@ -183,9 +184,15 @@ function Chat() {
           ))}
 
           {userQuit ? (
-            <Text>Developer has disconnected!</Text>
+            <Text fontSize="sm" fontWeight="bold">
+              Developer has disconnected!
+            </Text>
           ) : (
-            stop && <Text>You have disconnected!</Text>
+            stop && (
+              <Text fontSize="sm" fontWeight="bold">
+                You have disconnected!
+              </Text>
+            )
           )}
         </Box>
       </Box>
@@ -207,6 +214,14 @@ function Chat() {
           type="button"
         >
           {stop || userQuit ? <Text>New</Text> : <Text>Stop</Text>}
+          <Text
+            display={{ md: "unset", base: "none" }}
+            fontFamily="monospace"
+            fontSize="sm"
+            color="blue.300"
+          >
+            Esc
+          </Text>
         </Button>
         <Input
           variant="unstyled"
@@ -237,6 +252,9 @@ function Chat() {
           gap={1}
         >
           <Text>Send</Text>
+          <Text fontFamily="monospace" fontSize="sm" color="blue.300">
+            Enter
+          </Text>
         </Button>
       </Flex>
     </Grid>
