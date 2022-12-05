@@ -74,7 +74,6 @@ export const PusherProvider = ({ children }: Props) => {
           await axios.post("/api/room", {
             channelId: pusherId,
             userCount: data.count,
-            members: data.members,
           });
 
           if (data.count === 2) {
@@ -92,18 +91,17 @@ export const PusherProvider = ({ children }: Props) => {
     );
 
     channel.bind("message", (data: any) => {
-      console.log("DATA FROM JOIN CHANNEL", data.message);
+      // console.log("DATA FROM JOIN CHANNEL", data.message);
       setPayload({ message: data.message, user: data.userId });
     });
 
     channel.bind("pusher:member_added", (member: any) => {
-      console.log("Hello from member_added event", member.id);
+      // console.log("Hello from member_added event", member.id);
       setFoundUser(true);
     });
 
     channel.bind("pusher:member_removed", async (member: any) => {
-      console.log("Goodbye from member_removed event", member.id);
-
+      // console.log("Goodbye from member_removed event", member.id);
       await axios.post("/api/room", {
         channelId: pusherId,
         isClosed: true,
@@ -141,8 +139,6 @@ export const PusherProvider = ({ children }: Props) => {
   };
 
   useEffect(() => {
-    // Only start pusher at specific moments
-    // TODO: Maybe implement a way to kill/restart it?
     if (startPusher) {
       if (process.env.NODE_ENV !== "production") {
         // Enable pusher logging - isn't included in production
