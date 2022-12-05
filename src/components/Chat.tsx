@@ -24,7 +24,8 @@ function Chat() {
   const [message, setMessage] = useState([{} as Payload]);
   const [stopCount, setStopCount] = useState(1);
 
-  const btnRef = useRef(null);
+  const buttonRef = useRef<any>(null);
+  const messageRef = useRef<null | HTMLDivElement>(null);
 
   // A random delay to *ATTEMPT* to prevent multiple connections beyond room the limits
   const delay = Math.floor(Math.random() * 10000 + 1);
@@ -73,6 +74,24 @@ function Chat() {
 
     setNewMessage("");
   }
+
+  if (typeof window !== "undefined") {
+    window.addEventListener("keydown", (e) => {
+      if (e.code === "Escape") {
+        e.preventDefault();
+        handleStopButton();
+        return;
+      }
+    });
+  }
+
+  useEffect(() => {
+    if (messageRef.current) {
+      messageRef.current.scrollIntoView({
+        behavior: "smooth",
+      });
+    }
+  }, [payload.message, userQuit]);
 
   useEffect(() => {
     setTimeout(() => joinChannel(), delay);
@@ -152,7 +171,9 @@ function Chat() {
                 )
               )}
               {msg?.message?.length > 0 && (
-                <Text display="inline-block">{msg?.message}</Text>
+                <Text ref={messageRef} display="inline-block">
+                  {msg?.message}
+                </Text>
               )}
             </Box>
           ))}
@@ -166,6 +187,7 @@ function Chat() {
       </Box>
       <Flex gap={2}>
         <Button
+          ref={buttonRef}
           width={"150px"}
           borderRadius="none"
           borderBottomLeftRadius={{ md: 10, base: "unset" }}
@@ -194,6 +216,7 @@ function Chat() {
           disabled={!foundUser}
         />
         <Button
+          display={{ md: "flex", base: "none" }}
           width={"150px"}
           borderRadius="none"
           borderBottomRightRadius={10}
